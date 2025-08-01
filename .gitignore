@@ -28,6 +28,7 @@ config.py   # contains USER + API_KEY for Grafana Cloud
 *.dll
 *.so
 *.dylib
+*.zip
 
 # ---- Data Files ----
 *.json
