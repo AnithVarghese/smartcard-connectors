@@ -1,0 +1,53 @@
+# ---- Python ----
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pycache
+
+# Virtual environments
+.venv/
+env/
+venv/
+ENV/
+
+# ---- Environment & Secrets ----
+.env
+*.key
+*.pem
+*.crt
+config.py   # contains USER + API_KEY for Grafana Cloud
+
+# ---- Logs & Temp Files ----
+*.log
+*.tmp
+*.out
+
+# ---- Binaries ----
+*.exe
+*.dll
+*.so
+*.dylib
+
+# ---- Data Files ----
+*.json
+*.db
+*.sqlite
+*.csv
+
+# ---- Prometheus, Tempo, Loki Specific ----
+# Local Prometheus DB
+data/
+wal/
+
+# Loki index/chunks/cache
+index/
+chunks/
+cache/
+
+# Tempo traces
+tempo-data/
+
+# ---- Misc ----
+.DS_Store
+Thumbs.db
