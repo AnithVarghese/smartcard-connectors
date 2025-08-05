@@ -10,6 +10,8 @@ venv310/
 .venv/
 env/
 venv/
+venv*/
+
 ENV/
 venv/*
 **/venv/
