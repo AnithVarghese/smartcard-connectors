@@ -6,6 +6,7 @@ __pycache__/
 *.pycache
 
 # Virtual environments
+venv310/
 .venv/
 env/
 venv/

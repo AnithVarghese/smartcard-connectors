@@ -1,0 +1,6 @@
+flask
+requests
+python-socketio
+websocket-client
+eventlet
+python-dotenv
