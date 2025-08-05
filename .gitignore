@@ -6,11 +6,13 @@ __pycache__/
 *.pycache
 
 # Virtual environments
-venv310/
-.venv/
-env/
 venv/
-ENV/
+venv/*
+**/venv/
+**/venv/*
+.venv/
+# For your custom-named virtualenv:
+venv310/
 
 # ---- Environment & Secrets ----
 .env
