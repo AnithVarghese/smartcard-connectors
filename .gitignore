@@ -9,12 +9,14 @@ __pycache__/
 venv310/
 .venv/
 env/
+**/env/
 venv/
 venv*/
-
+**/ENV/
 ENV/
 venv/*
 **/venv/
+**/.venv/
 **/venv/*
 **/venv310/
 **/venv310/*

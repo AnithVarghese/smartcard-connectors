@@ -4,14 +4,24 @@ import requests
 import os
 import time
 import threading
+import jwt
+import datetime
+from functools import wraps
 from dotenv import load_dotenv
 
 load_dotenv()
 
+# Env config
 CLOUD_URL = os.getenv("CLOUD_URL", "https://smcloudconnect.onrender.com")
 CLICKHOUSE_URL = os.getenv("CLICKHOUSE_URL", "http://localhost:8123")
 CLICKHOUSE_USER = os.getenv("CLICKHOUSE_USER", "default")
 CLICKHOUSE_PASS = os.getenv("CLICKHOUSE_PASS", "")
+
+# JWT config
+JWT_SECRET = os.getenv('JWT_SECRET', 'your-secret')
+JWT_ALGORITHM = 'HS256'
+ACCESS_TOKEN_EXPIRE_MINUTES = 60
+REFRESH_TOKEN_EXPIRE_DAYS = 7
 
 app = Flask(__name__)
 sio = socketio.Client()
@@ -28,7 +38,7 @@ def run_query(query):
             return {"error": r.text}
         try:
             return r.json()
-        except:
+        except Exception:
             return {"raw": r.text}
     except Exception as e:
         return {"error": str(e)}
@@ -58,8 +68,82 @@ def list_columns(dbname, tablename):
     try:
         cols = [col["name"] for col in result["data"]]
         return jsonify({"columns": cols})
-    except:
+    except Exception:
         return jsonify(result)
+
+# --- JWT Token Auth Standardized Routes ---
+
+def create_token(identity, expires_delta=None):
+    payload = {
+        'sub': identity,
+        'iat': datetime.datetime.utcnow(),
+        'exp': datetime.datetime.utcnow() + (expires_delta or datetime.timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
+    }
+    token = jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
+    return token if isinstance(token, str) else token.decode('utf-8')
+
+def token_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = None
+        if 'Authorization' in request.headers:
+            auth_header = request.headers['Authorization']
+            parts = auth_header.split()
+            if len(parts) == 2 and parts[0].lower() == 'bearer':
+                token = parts[1]
+        if not token:
+            return jsonify({'message': 'Token is missing!'}), 401
+        try:
+            data = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+            current_user = data['sub']
+        except jwt.ExpiredSignatureError:
+            return jsonify({'message': 'Token has expired!'}), 401
+        except jwt.InvalidTokenError:
+            return jsonify({'message': 'Invalid token!'}), 401
+        return f(current_user, *args, **kwargs)
+    return decorated
+
+@app.route("/auth", methods=["POST"])
+def auth():
+    data = request.json
+    username = data.get('username')
+    password = data.get('password')
+    # Replace this dummy check with your real user logic
+    if username == 'admin' and password == 'password':
+        access_token = create_token(username)
+        refresh_token = create_token(username, datetime.timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS))
+        return jsonify({
+            'access_token': access_token,
+            'refresh_token': refresh_token,
+            'token_type': 'bearer'
+        })
+    return jsonify({'error': 'Invalid credentials'}), 401
+
+@app.route("/tokenrefresh", methods=["POST"])
+def tokenrefresh():
+    data = request.json
+    refresh_token = data.get('refresh_token')
+    if not refresh_token:
+        return jsonify({'error': 'Refresh token is required'}), 400
+    try:
+        payload = jwt.decode(refresh_token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+        username = payload.get('sub')
+        new_access_token = create_token(username)
+        return jsonify({
+            'access_token': new_access_token,
+            'token_type': 'bearer'
+        })
+    except jwt.ExpiredSignatureError:
+        return jsonify({'error': 'Refresh token expired'}), 401
+    except jwt.InvalidTokenError:
+        return jsonify({'error': 'Invalid refresh token'}), 401
+
+@app.route("/secure-data")
+@token_required
+def secure_data(current_user):
+    return jsonify({"message": f"Hello, {current_user}, this is protected data!"})
+
+# --- Socket.IO Events ---
 
 @sio.event
 def connect():
@@ -89,12 +173,11 @@ def handle_api_request(data):
             try:
                 cols = [col["name"] for col in result["data"]]
                 response = {"columns": cols}
-            except:
+            except Exception:
                 response = result
     except Exception as e:
         response = {"error": str(e)}
     sio.emit("api_response", {"request_id": request_id, "response": response})
-
 
 def start_socketio():
     while True:
