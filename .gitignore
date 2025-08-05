@@ -11,6 +11,11 @@ venv310/
 env/
 venv/
 ENV/
+venv/*
+**/venv/
+**/venv/*
+**/venv310/
+**/venv310/*
 
 # ---- Environment & Secrets ----
 .env
