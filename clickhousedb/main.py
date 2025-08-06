@@ -26,6 +26,9 @@ REFRESH_TOKEN_EXPIRE_DAYS = 7
 app = Flask(__name__)
 sio = socketio.Client()
 
+
+# --- Utility Functions ---
+
 def run_query(query):
     try:
         r = requests.post(
@@ -43,35 +46,6 @@ def run_query(query):
     except Exception as e:
         return {"error": str(e)}
 
-@app.route("/", methods=["GET"])
-def home():
-    return jsonify({"status": "Local ClickHouse Connector running"})
-
-@app.route("/health", methods=["GET"])
-def health():
-    return jsonify({"status": "ok"})
-
-@app.route("/Schema/<dbname>/<tablename>", methods=["GET"])
-def schema(dbname, tablename):
-    query = f"DESCRIBE TABLE {dbname}.{tablename} FORMAT JSON"
-    return jsonify(run_query(query))
-
-@app.route("/ListofTables/<dbname>", methods=["GET"])
-def list_tables(dbname):
-    query = f"SHOW TABLES FROM {dbname} FORMAT JSON"
-    return jsonify(run_query(query))
-
-@app.route("/ListofColumns/<dbname>/<tablename>", methods=["GET"])
-def list_columns(dbname, tablename):
-    query = f"DESCRIBE TABLE {dbname}.{tablename} FORMAT JSON"
-    result = run_query(query)
-    try:
-        cols = [col["name"] for col in result["data"]]
-        return jsonify({"columns": cols})
-    except Exception:
-        return jsonify(result)
-
-# --- JWT Token Auth Standardized Routes ---
 
 def create_token(identity, expires_delta=None):
     payload = {
@@ -81,6 +55,7 @@ def create_token(identity, expires_delta=None):
     }
     token = jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
     return token if isinstance(token, str) else token.decode('utf-8')
+
 
 def token_required(f):
     @wraps(f)
@@ -103,12 +78,73 @@ def token_required(f):
         return f(current_user, *args, **kwargs)
     return decorated
 
+# --- Core REST API ---
+
+@app.route("/", methods=["GET"])
+def home():
+    return jsonify({"status": "Local ClickHouse Connector running"})
+
+
+@app.route("/health", methods=["GET"])
+def health():
+    return jsonify({"status": "ok"})
+
+
+@app.route("/Schema/<dbname>/<tablename>", methods=["GET"])
+def schema(dbname, tablename):
+    query = f"DESCRIBE TABLE {dbname}.{tablename} FORMAT JSON"
+    return jsonify(run_query(query))
+
+
+@app.route("/ListofTables/<dbname>", methods=["GET"])
+def list_tables(dbname):
+    query = f"SHOW TABLES FROM {dbname} FORMAT JSON"
+    return jsonify(run_query(query))
+
+
+@app.route("/ListofColumns/<dbname>/<tablename>", methods=["GET"])
+def list_columns(dbname, tablename):
+    query = f"DESCRIBE TABLE {dbname}.{tablename} FORMAT JSON"
+    result = run_query(query)
+    try:
+        cols = [col["name"] for col in result["data"]]
+        return jsonify({"columns": cols})
+    except Exception:
+        return jsonify(result)
+
+
+# --- API: Get all data from a table (ClickHouse only for now) ---
+
+@app.route('/Api/data/<producttype>/<dbname>/<tablename>', methods=['GET'])
+#@token_required  # Uncomment to protect with token (if desired)
+def api_data(producttype, dbname, tablename):
+    if producttype.lower() == 'clickhouse':
+        query = f"SELECT * FROM {dbname}.{tablename} FORMAT JSON"
+        return jsonify(run_query(query))
+    else:
+        return jsonify({"error": f"Product type '{producttype}' not supported"}), 400
+
+
+# --- API: Accept arbitrary query, return result (ClickHouse) ---
+
+@app.route('/Query', methods=['POST'])
+#@token_required  # Uncomment to protect with token (if desired)
+def query_endpoint():
+    data = request.get_json(force=True)
+    query = data.get('query')
+    if not query:
+        return jsonify({"error": "No query provided"}), 400
+    return jsonify(run_query(query))
+
+
+# --- JWT Auth routes ---
+
 @app.route("/auth", methods=["POST"])
 def auth():
     data = request.json
     username = data.get('username')
     password = data.get('password')
-    # Replace this dummy check with your real user logic
+    # Replace this dummy check with real authentication logic!
     if username == 'admin' and password == 'password':
         access_token = create_token(username)
         refresh_token = create_token(username, datetime.timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS))
@@ -143,7 +179,7 @@ def tokenrefresh():
 def secure_data(current_user):
     return jsonify({"message": f"Hello, {current_user}, this is protected data!"})
 
-# --- Socket.IO Events ---
+# --- Socket.IO Cloud Tunnel ---
 
 @sio.event
 def connect():
@@ -175,6 +211,13 @@ def handle_api_request(data):
                 response = {"columns": cols}
             except Exception:
                 response = result
+        elif parts[0].lower() == "api" and parts[1].lower() == "data" and len(parts) == 5:
+            producttype, dbname, tablename = parts[2], parts[3], parts[4]
+            if producttype.lower() == "clickhouse":
+                query = f"SELECT * FROM {dbname}.{tablename} FORMAT JSON"
+                response = run_query(query)
+            else:
+                response = {"error": f"Product type '{producttype}' not supported"}
     except Exception as e:
         response = {"error": str(e)}
     sio.emit("api_response", {"request_id": request_id, "response": response})
