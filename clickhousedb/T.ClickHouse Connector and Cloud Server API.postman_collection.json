@@ -1,0 +1,423 @@
+{
+	"info": {
+		"_postman_id": "8b340876-f725-4456-8957-c7a5d3d7b9a4",
+		"name": "T.ClickHouse Connector and Cloud Server API (testdb.visits)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "42637178"
+	},
+	"item": [
+		{
+			"name": "Main.py (Local Connector) - localhost:5000",
+			"item": [
+				{
+					"name": "Home",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Health",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/health",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"health"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Schema",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/Schema/testdb/visits",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"Schema",
+								"testdb",
+								"visits"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ListofTables",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/ListofTables/testdb",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"ListofTables",
+								"testdb"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ListofColumns",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/ListofColumns/testdb/visits",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"ListofColumns",
+								"testdb",
+								"visits"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Data (Api/data)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/Api/data/clickhouse/testdb/visits",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"Api",
+								"data",
+								"clickhouse",
+								"testdb",
+								"visits"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Query (Arbitrary Query)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"query\": \"SELECT count(*) FROM testdb.visits FORMAT JSON\"}"
+						},
+						"url": {
+							"raw": "http://localhost:5000/Query",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"Query"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Auth",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"username\": \"admin\", \"password\": \"password\"}"
+						},
+						"url": {
+							"raw": "http://localhost:5000/auth",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"auth"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "TokenRefresh",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"refresh_token\": \"<refresh_token>\"}"
+						},
+						"url": {
+							"raw": "http://localhost:5000/tokenrefresh",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"tokenrefresh"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Cloud_server.py (Render) - https://smcloudconnect.onrender.com",
+			"item": [
+				{
+					"name": "Index",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://smcloudconnect.onrender.com/",
+							"protocol": "https",
+							"host": [
+								"smcloudconnect",
+								"onrender",
+								"com"
+							],
+							"path": [
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Schema",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://smcloudconnect.onrender.com/Schema/testdb/visits",
+							"protocol": "https",
+							"host": [
+								"smcloudconnect",
+								"onrender",
+								"com"
+							],
+							"path": [
+								"Schema",
+								"testdb",
+								"visits"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ListofTables",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://smcloudconnect.onrender.com/ListofTables/testdb",
+							"protocol": "https",
+							"host": [
+								"smcloudconnect",
+								"onrender",
+								"com"
+							],
+							"path": [
+								"ListofTables",
+								"testdb"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ListofColumns",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://smcloudconnect.onrender.com/ListofColumns/testdb/visits",
+							"protocol": "https",
+							"host": [
+								"smcloudconnect",
+								"onrender",
+								"com"
+							],
+							"path": [
+								"ListofColumns",
+								"testdb",
+								"visits"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Data (Api/data)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://smcloudconnect.onrender.com/Api/data/clickhouse/testdb/visits",
+							"protocol": "https",
+							"host": [
+								"smcloudconnect",
+								"onrender",
+								"com"
+							],
+							"path": [
+								"Api",
+								"data",
+								"clickhouse",
+								"testdb",
+								"visits"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Query (Arbitrary Query)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"query\": \"SELECT count(*) FROM testdb.visits FORMAT JSON\"}"
+						},
+						"url": {
+							"raw": "https://smcloudconnect.onrender.com/Query",
+							"protocol": "https",
+							"host": [
+								"smcloudconnect",
+								"onrender",
+								"com"
+							],
+							"path": [
+								"Query"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Auth",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"username\": \"admin\", \"password\": \"password\"}"
+						},
+						"url": {
+							"raw": "https://smcloudconnect.onrender.com/auth",
+							"protocol": "https",
+							"host": [
+								"smcloudconnect",
+								"onrender",
+								"com"
+							],
+							"path": [
+								"auth"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "TokenRefresh",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"refresh_token\": \"<refresh_token>\"}"
+						},
+						"url": {
+							"raw": "https://smcloudconnect.onrender.com/tokenrefresh",
+							"protocol": "https",
+							"host": [
+								"smcloudconnect",
+								"onrender",
+								"com"
+							],
+							"path": [
+								"tokenrefresh"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
